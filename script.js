@@ -1,12 +1,14 @@
 // ==UserScript==
-// @name         Joyn.de Adblocker
-// @version      1.0.0
-// @description  Adblocker for Joyn.de, because the common adblockers are blocked
-// @author       TalkLounge (https://github.com/TalkLounge)
-// @namespace    https://github.com/TalkLounge/joyn.de-adblocker
-// @license      MIT
-// @match        https://www.joyn.de/*
-// @grant        none
+// @name            Joyn.de Adblocker
+// @name:de         Joyn.de Adblocker
+// @version         1.0.0
+// @description     Adblocker for Joyn.de, because the common adblockers are blocked
+// @description:de  Adblocker für Joyn.de, da die gängigen Adblocker blockiert werden
+// @author          TalkLounge (https://github.com/TalkLounge)
+// @namespace       https://github.com/TalkLounge/joyn.de-adblocker
+// @license         MIT
+// @match           https://www.joyn.de/*
+// @grant           none
 // ==/UserScript==
 
 (function () {
