@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Joyn.de Adblocker
 // @name:de         Joyn.de Adblocker
-// @version         1.0.0
+// @version         1.0.1
 // @description     Adblocker for Joyn.de, because the common adblockers are blocked
 // @description:de  Adblocker für Joyn.de, da die gängigen Adblocker blockiert werden
 // @author          TalkLounge (https://github.com/TalkLounge)
@@ -66,7 +66,7 @@
 
             black.appendChild(inner);
 
-            document.body.append(black);
+            video.parentNode.append(black);
         }
 
         video.playbackRate = 100;
