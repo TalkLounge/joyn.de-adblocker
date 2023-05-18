@@ -3,4 +3,4 @@ Tampermonkey Userscript Adblocking for Joyn.de, because the common adblockers ar
 
 [Install on Greasyfork](https://greasyfork.org/scripts/438891)
 
-![Image](image.jpg)
+<video src="video.mp4" muted autoplay></video>

@@ -1,76 +1,78 @@
 // ==UserScript==
 // @name            Joyn.de Adblocker
 // @name:de         Joyn.de Adblocker
-// @version         1.0.1
+// @version         2.0.0
 // @description     Adblocker for Joyn.de, because the common adblockers are blocked
 // @description:de  Adblocker für Joyn.de, da die gängigen Adblocker blockiert werden
+// @icon            https://www.joyn.de/favicon.ico
 // @author          TalkLounge (https://github.com/TalkLounge)
 // @namespace       https://github.com/TalkLounge/joyn.de-adblocker
 // @license         MIT
 // @match           https://www.joyn.de/*
 // @grant           none
+// @run-at          document-start
 // ==/UserScript==
 
 (function () {
     'use strict';
-    var video, volume;
 
-    function init() {
-        if (!video || !video.src) {
-            video = document.querySelector("video");
+    const old_window_top_fetch = window.top.fetch;
+
+    function checkURL(args, url) {
+        if (
+            (
+                typeof (args[0]) == "object" &&
+                args[0].url &&
+                new URL(args[0].url).host.includes(url)
+            ) || (
+                typeof (args[0]) == "string" &&
+                args[0] &&
+                new URL(args[0]).host.includes(url)
+            )
+        ) {
+            return true;
         }
-
-        if (volume && !document.querySelector("footer")) { // Reset volume when ad section is over
-            video.volume = volume;
-            volume = undefined;
-
-            document.getElementById("black").remove();
-            return;
-        }
-
-        if (!document.querySelector("footer") || // Is ad section
-            !video ||
-            video.duration > 60 || // Probably not an ad
-            video.readyState <= 0 || // Video not ready
-            video.playbackRate == 100) {
-            return;
-        }
-
-        if (!volume) { // Mute video and set loading screen
-            volume = video.volume;
-            video.volume = 0;
-
-            var black = document.createElement("div");
-            black.setAttribute("id", "black");
-            black.style.position = "absolute";
-            black.style.width = "100%";
-            black.style.height = "100%";
-            black.style.backgroundColor = "black";
-            black.style.display = "flex";
-            black.style.justifyContent = "center";
-            black.style.alignItems = "center";
-
-            var inner = document.createElement("div");
-
-            var loading = document.createElement("img");
-            loading.setAttribute("src", "https://thumbs.gfycat.com/SkinnySeveralAsianlion-max-1mb.gif");
-            loading.setAttribute("height", "75");
-            loading.style.display = "flex";
-            loading.style.margin = "auto";
-            inner.appendChild(loading);
-
-            var text = document.createElement("h1");
-            text.innerHTML = "Überspringe Werbung";
-            text.style.marginTop = "25%";
-            inner.appendChild(text);
-
-            black.appendChild(inner);
-
-            video.parentNode.append(black);
-        }
-
-        video.playbackRate = 100;
     }
 
-    window.setInterval(init, 500);
+    window.top.fetch = function (...args) {
+        if ([
+            "sqrt-5041.de",
+            "ad71.adfarm1.adition.com",
+            "bat.bing.com",
+            "9478953.fls.doubleclick.net",
+            "googleads.g.doubleclick.net",
+            "connect.facebook.net",
+            "static.hotjar.com",
+            "cdn-gl.nmrodam.com",
+            "amplify.outbrain.com",
+            "tr.outbrain.com",
+            "alb.reddit.com",
+            "cdn.segment.com",
+            "o292998.ingest.sentry.io",
+            "dmp.theadex.com",
+            "analytics.tiktok.com"
+        ].find(item => checkURL(args, item))) { // Block Ad & Tracking Web Requests from Privacy Badger Extension
+            return;
+        }
+
+        if (!checkURL(args, "swankyrule.zomap.de")) { // Don't Intercept other Web Requests except https://swankyrule.zomap.de/v2/
+            return old_window_top_fetch.apply(null, args);
+        }
+
+        return new Promise(async (resolve, reject) => {
+            const data = await old_window_top_fetch.apply(null, args);
+            const text = await (await data.clone()).text();
+            if (text.indexOf("<MediaFiles>") == -1) {
+                return resolve(data);
+            }
+            data.text = function () {
+                return new Promise((resolve, reject) => {
+                    const xmlDoc = new DOMParser().parseFromString(text, "text/xml");
+                    xmlDoc.querySelectorAll("MediaFile").forEach((item) => item.remove()); // Delete all MediaFile Elements in XML
+                    resolve(new XMLSerializer().serializeToString(xmlDoc));
+                });
+            };
+            resolve(data);
+        });
+    };
 })();
